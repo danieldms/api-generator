@@ -52,8 +52,18 @@ function createFiles(){
 
 function createResource(resource){
 	var singular = resource;
-	var resource = pluralize.plural(resource);
+	var plural = pluralize.plural(resource);
 
+	createController(singular, plural);
+	createModel(singular, plural);
+}
+
+
+function createController(singular, plural){
+
+	resource = capitalizeFirstLetter(plural);
+
+	// Template Controller
 	var tpl = 
 	"module.exports = function(router) {\n"+
 	"	router.get('/"+ singular +"', function(req, res, next) { \n"+
@@ -77,17 +87,36 @@ function createResource(resource){
 	"	});\n\n"+
 	"};\n\n";
 
-	resource = capitalizeFirstLetter(resource);
 	var path = './api/controllers/'+ resource +'Controller.js';
-	
+
+	// Create Controller
 	fs.writeFile(path, tpl, (err) => {
 	 	if (err) throw err;
 	 	console.log('~> created file ' + path);
 	});
-	
+}
 
+function createModel(singular, plural){
 
+	resource = capitalizeFirstLetter(plural);
 
+	// Tpl Schema
+	var tpl = 
+	"var mongoose = require('mongoose');\n"+
+	"var Schema = mongoose.Schema;\n"+
+
+	"module.exports = mongoose.model('"+ plural +"', new Schema({\n"+
+	"	create_at: { type: Date, default: Date.now }\n"+
+	"	update_at: { type: Date, default: Date.now }\n"+
+	"}));";
+
+	var path = './api/models/'+ resource +'Schema.js';
+
+	// Create Schema
+	fs.writeFile(path, tpl, (err) => {
+	 	if (err) throw err;
+	 	console.log('~> created file ' + path);
+	});
 }
 
 // Util
