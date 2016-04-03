@@ -4,6 +4,8 @@ var program = require('commander');
 var pluralize = require('pluralize')
 
 var version = "v1/";
+var root_path = "./api";
+var index_path = root_path + "/index.js";
 
 program
     .version('0.0.1')
@@ -23,15 +25,15 @@ if(program.resource){
 
 // Functions
 function createFolders(){
-	fs.mkdir("./api", () => {
+	fs.mkdir(root_path, () => {
 		
 		console.log("created folder \'api\'");
 
-		fs.mkdir("./api/models", () => {
+		fs.mkdir(root_path + "/models", () => {
 			console.log("created folder \'api\/models\'");
 		});
 
-		fs.mkdir("./api/controllers", () => {
+		fs.mkdir(root_path + "/controllers", () => {
 			console.log("created folder \'api\/controllers\'");
 		});
 	});
@@ -44,7 +46,7 @@ function createFiles(){
 			  "  app.use('/api/v1', router); \n"+
 			  "};";
 
-	fs.writeFile('./api/index.js', tpl, (err) => {
+	fs.writeFile(index_path, tpl, (err) => {
 	 	if (err) throw err;
 	 	console.log('created file index.js');
 	});
@@ -87,13 +89,14 @@ function createController(singular, plural){
 	"	});\n\n"+
 	"};\n\n";
 
-	var path = './api/controllers/'+ resource +'Controller.js';
+	var controller = resource + "Controller.js";
 
-	// Create Controller
-	fs.writeFile(path, tpl, (err) => {
-	 	if (err) throw err;
-	 	console.log('~> created file ' + path);
-	});
+	var path =  '/controllers/'+ controller;
+	var path_all = root_path + path;
+	
+	// Create file Controller
+	createFile(path_all, tpl);
+	addRoute(controller, "." + path);
 }
 
 function createModel(singular, plural){
@@ -110,16 +113,57 @@ function createModel(singular, plural){
 	"	update_at: { type: Date, default: Date.now }\n"+
 	"}));";
 
-	var path = './api/models/'+ resource +'Schema.js';
+	var path = root_path + '/models/'+ resource +'Schema.js';
 
-	// Create Schema
-	fs.writeFile(path, tpl, (err) => {
+	createFile(path, tpl);
+}
+
+function addRoute(controller, path){
+	// Fs read index file && add new file into routes
+	fs.readFile(index_path, "utf8", (err, data) => {
 	 	if (err) throw err;
-	 	console.log('~> created file ' + path);
+	 	
+	 	if(data){
+	 		var new_data = [];
+	 		// By lines
+    		var lines = data.split('\n');
+    		for(var line = 0; line < lines.length; line++){
+    			var inline = lines[line];
+
+    			new_data.push(inline);
+
+    			// Search && add controllers
+    			var search = inline.indexOf("express.Router()");
+	 			if( search >= 0){
+	 				new_data.push("\n// Resource for " + controller);
+	 				new_data.push("require('"+ path +"')(router);");
+	 			}
+
+			}
+
+			// create new file
+			createFile(index_path, new_data.join("\n"));
+			console.log("~> add new routes in index file");
+
+	 	}
 	});
 }
+
+
 
 // Util
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function createFile(file, string) {
+	var s = "created";
+	if(false){
+		s = "re-created";
+	}
+	// Create Schema
+	fs.writeFile(file, string, (err) => {
+	 	if (err) throw err;
+	 	console.log('~> created file ' + file);
+	});
 }
