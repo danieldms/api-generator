@@ -4,16 +4,20 @@ var program = require('commander');
 const pluralize = require('pluralize');
 const dot = require('dot');
 
+// Custom libs
 var Util = require(__dirname +'/util.js')();
-console.log(Util);
 
 // CONSTS
 const version = "v1/";
+
 const root_path = "./api";
 const index_path = root_path + "/index.js";
+
+const templateDir = __dirname +'/templates/';
+
+// Model & Controller path
 const controllerDir = root_path + '/controllers';
 const modelDir = root_path + '/models';
-const templateDir = __dirname +'/templates/';
 
 // Const template settings
 var templateSettings = Object.keys(dot.templateSettings).reduce((o, k) => {
@@ -33,7 +37,7 @@ program
 
 if(program.init){
 	generateFolders();
-	createMain();
+	_init();
 }
 
 if(program.resource){
@@ -41,27 +45,32 @@ if(program.resource){
 }
 
 // Functions
-function generateFolders(){
-	fs.mkdir(root_path, () => {
-		
-		console.log("creating folder \'api\'");
-
-		fs.mkdir(modelDir, () => {
-			console.log("creating folder \'api\/models\'");
-		});
-
-		fs.mkdir(controllerDir, () => {
-			console.log("creating folder \'api\/controllers\'");
-		});
-	});
-}
-
-function createMain(){
+function _init(){
+	// template index file
     var fn = fs.readFileSync(__dirname +'/templates/main.jst').toString();
 
 	fs.writeFile(index_path, fn, (err) => {
 	 	if (err) throw err;
 	 	console.log('creating index.js...');
+	});
+
+	// template config file
+	var fn = fs.readFileSync(__dirname +'/templates/config.jst').toString();
+
+	fs.writeFile(root_path + "/config.json", fn, (err) => {
+	 	if (err) throw err;
+	 	console.log('creating config.json...');
+	});
+}
+
+function generateFolders(){
+
+	console.log("creating folders and configure files...");
+
+	fs.mkdir(root_path, () => {
+		fs.mkdir(modelDir, () => {});
+
+		fs.mkdir(controllerDir, () => {});
 	});
 }
 
