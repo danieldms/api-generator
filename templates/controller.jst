@@ -1,0 +1,22 @@
+// Template Controller
+module.exports = function(router) {
+	router.get('/{{= data.name }}', function(req, res, next) { 
+		res.json({type: true});
+	}); 
+
+	router.get('/{{= data.name }}/:id', function(req, res, next) {
+		res.json({type: true});
+	});
+
+	router.post('/{{= data.name }}', function(req, res, next) {
+		res.json({type: true});
+	});
+
+	router.put('/{{= data.name }}/:id', function(req, res, next) {
+		res.json({type: true});
+	});
+
+	router.delete('/{{= data.name }}/:id', function(req, res, next) {
+		res.json({type: true});
+	});
+};

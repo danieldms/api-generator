@@ -1,11 +1,28 @@
 #!/usr/bin/env node
 const fs = require('fs');
 var program = require('commander');
-var pluralize = require('pluralize')
+const pluralize = require('pluralize');
+const dot = require('dot');
 
-var version = "v1/";
-var root_path = "./api";
-var index_path = root_path + "/index.js";
+var Util = require(__dirname +'/util.js')();
+console.log(Util);
+
+// CONSTS
+const version = "v1/";
+const root_path = "./api";
+const index_path = root_path + "/index.js";
+const controllerDir = root_path + '/controllers';
+const modelDir = root_path + '/models';
+const templateDir = __dirname +'/templates/';
+
+// Const template settings
+var templateSettings = Object.keys(dot.templateSettings).reduce((o, k) => {
+	o[k] = dot.templateSettings[k];
+	return o;
+}, {});
+
+templateSettings.strip = false;
+templateSettings.varname = 'data';
 
 program
     .version('0.0.1')
@@ -15,155 +32,82 @@ program
     .parse(process.argv);
 
 if(program.init){
-	createFolders();
-	createFiles();
+	generateFolders();
+	createMain();
 }
 
 if(program.resource){
-	createResource(program.resource);
+	generateResources(program.resource);
 }
 
 // Functions
-function createFolders(){
+function generateFolders(){
 	fs.mkdir(root_path, () => {
 		
-		console.log("created folder \'api\'");
+		console.log("creating folder \'api\'");
 
-		fs.mkdir(root_path + "/models", () => {
-			console.log("created folder \'api\/models\'");
+		fs.mkdir(modelDir, () => {
+			console.log("creating folder \'api\/models\'");
 		});
 
-		fs.mkdir(root_path + "/controllers", () => {
-			console.log("created folder \'api\/controllers\'");
+		fs.mkdir(controllerDir, () => {
+			console.log("creating folder \'api\/controllers\'");
 		});
 	});
 }
 
-function createFiles(){
-	var tpl = "var express = require('express'); \n"+
-			  "var router = express.Router(); \n" +
-			  "module.exports = function(app) { \n" +
-			  "  app.use('/api/v1', router); \n"+
-			  "};";
+function createMain(){
+    var fn = fs.readFileSync(__dirname +'/templates/main.jst').toString();
 
-	fs.writeFile(index_path, tpl, (err) => {
+	fs.writeFile(index_path, fn, (err) => {
 	 	if (err) throw err;
-	 	console.log('created file index.js');
+	 	console.log('creating index.js...');
 	});
 }
 
-function createResource(resource){
-	var singular = resource;
-	var plural = pluralize.plural(resource);
+function generateResources(resource){
+	var cName = Util.capitalizeLetter(resource);
 
-	createController(singular, plural);
-	createModel(singular, plural);
+	var mName = pluralize.plural(resource);
+
+	createController({
+		"name": resource,
+		"controller": cName
+	});
+
+	createModel({
+		"name": pluralize.plural(resource),
+		"model":Util.capitalizeLetter( mName)
+	});
 }
 
 
-function createController(singular, plural){
+function createController(arg){
 
-	resource = capitalizeFirstLetter(plural);
+	var controllerName = arg.controller + "Controller.js";
 
-	// Template Controller
-	var tpl = 
-	"module.exports = function(router) {\n"+
-	"	router.get('/"+ singular +"', function(req, res, next) { \n"+
-	"		res.json({type: true});\n"+
-	"	}); \n\n"+
+	var path_all = root_path + '/controllers/'+ controllerName;
 
-	"	router.get('/"+ singular +"/:id', function(req, res, next) {\n"+
-	"		res.json({type: true});\n"+
-	"	});\n\n"+
+	var fn = dot.template(
+      fs.readFileSync(templateDir + "controller.jst").toString(),
+      templateSettings
+    );
 
-	"	router.post('/"+ singular +"', function(req, res, next) {\n"+
-	"		res.json({type: true});\n"+
-	"	});\n\n"+
-
-	"	router.put('/"+ singular +"/:id', function(req, res, next) {\n"+
-	"		res.json({type: true});\n"+
-	"	});\n\n"+
-
-	"	router.delete('/"+ singular +"/:id', function(req, res, next) {\n"+
-	"		res.json({type: true});\n"+
-	"	});\n\n"+
-	"};\n\n";
-
-	var controller = resource + "Controller.js";
-
-	var path =  '/controllers/'+ controller;
-	var path_all = root_path + path;
+    var tpl = fn(arg);
 	
 	// Create file Controller
-	createFile(path_all, tpl);
-	addRoute(controller, "." + path);
+	Util.createFile(path_all, tpl);
 }
 
-function createModel(singular, plural){
+function createModel(arg){
+	var path = root_path + '/models/'+ arg.model +'Schema.js';
 
-	resource = capitalizeFirstLetter(plural);
+	var fn = dot.template(
+      fs.readFileSync(templateDir + "model.jst").toString(),
+      templateSettings
+    );
 
-	// Tpl Schema
-	var tpl = 
-	"var mongoose = require('mongoose');\n"+
-	"var Schema = mongoose.Schema;\n"+
+    var tpl = fn(arg);
 
-	"module.exports = mongoose.model('"+ plural +"', new Schema({\n"+
-	"	create_at: { type: Date, default: Date.now }\n"+
-	"	update_at: { type: Date, default: Date.now }\n"+
-	"}));";
-
-	var path = root_path + '/models/'+ resource +'Schema.js';
-
-	createFile(path, tpl);
-}
-
-function addRoute(controller, path){
-	// Fs read index file && add new file into routes
-	fs.readFile(index_path, "utf8", (err, data) => {
-	 	if (err) throw err;
-	 	
-	 	if(data){
-	 		var new_data = [];
-	 		// By lines
-    		var lines = data.split('\n');
-    		for(var line = 0; line < lines.length; line++){
-    			var inline = lines[line];
-
-    			new_data.push(inline);
-
-    			// Search && add controllers
-    			var search = inline.indexOf("express.Router()");
-	 			if( search >= 0){
-	 				new_data.push("\n// Resource for " + controller);
-	 				new_data.push("require('"+ path +"')(router);");
-	 			}
-
-			}
-
-			// create new file
-			createFile(index_path, new_data.join("\n"));
-			console.log("~> add new routes in index file");
-
-	 	}
-	});
-}
-
-
-
-// Util
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-function createFile(file, string) {
-	var s = "created";
-	if(false){
-		s = "re-created";
-	}
-	// Create Schema
-	fs.writeFile(file, string, (err) => {
-	 	if (err) throw err;
-	 	console.log('~> created file ' + file);
-	});
+	Util.createFile(path, tpl);
 }
