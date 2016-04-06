@@ -15,7 +15,17 @@ module.exports = function() {
 			 	if (err) throw err;
 			 	console.log('~> created file ' + path + "...");
 			});
+		},
+
+		modifyFile: function(path, string){
+			// Create file in disk
+			fs.writeFile(path, string, (err) => {
+			 	if (err) throw err;
+			 	console.log('~> Modified file ' + path + "...");
+			});
 		}
+
+
 
 
 	}

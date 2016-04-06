@@ -1,5 +1,12 @@
+// Module dependencies
 var express = require('express'); 
 var router = express.Router();
+
+// load controllers
+var config = require('./config.json');
+config.routes.forEach( function(element, index, array){
+	require("./controllers/" + element);
+});
 
 module.exports = function(app) { 
   app.use('/api/v1', router); 

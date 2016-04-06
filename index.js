@@ -106,6 +106,9 @@ function createController(arg){
 	
 	// Create file Controller
 	Util.createFile(path_all, tpl);
+
+	// generate route to controller
+	generateRoute(arg.controller);
 }
 
 function createModel(arg){
@@ -119,4 +122,38 @@ function createModel(arg){
     var tpl = fn(arg);
 
 	Util.createFile(path, tpl);
+}
+
+function generateRoute(arg){
+	var _path = root_path + '/config.json';
+
+	try {
+		var config = fs.readFileSync(_path).toString();
+		config = JSON.parse(config);
+
+	} catch(e){
+		console.error(e.message);
+
+		// template config file
+		var fn = fs.readFileSync(__dirname +'/templates/config.jst').toString();
+
+		fs.writeFile(root_path + "/config.json", fn, (err) => {
+		 	if (err) throw err;
+		 	console.log('creating config.json...');
+
+		 	console.log(arg);
+
+		 	generateRoute(arg);
+		});
+
+	} finally {
+		if(typeof config === "object"){
+			config.routes.push(arg + "Controller");
+			
+			Util.modifyFile(_path, JSON.stringify(config, null, 4));
+		}
+
+	}
+
+
 }
