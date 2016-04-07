@@ -1,7 +1,7 @@
 // Template Controller
 
 // model
-var model = require("../models/{{= data.model }}Schema");
+var {{= data.model }} = require("../models/{{= data.model }}Schema");
 
 module.exports = function(router) {
 	
@@ -9,7 +9,7 @@ module.exports = function(router) {
 	  * List all
 	  */
 	router.get('/{{= data.name }}', function(req, res, next) { 
-		model.find(function(err, data){
+		{{= data.model }}.find(function(err, data){
 
 			if (err) 
 				res.json({type: false, data: "Error occured: " + err});
@@ -26,7 +26,17 @@ module.exports = function(router) {
 	  * Show
 	  */
 	router.get('/{{= data.name }}/:id', function(req, res, next) {
-		res.json({type: true});
+		var _id = req.params.id;
+
+		{{= data.model }}.findOne({_id: _id}, function(err, data){
+			if (err)
+				res.json({type: false, data: "Error occured: " + err});
+
+			res.json({
+				type: true,
+				data: data
+			})
+		});
 	});
 
 
