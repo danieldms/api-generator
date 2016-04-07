@@ -77,7 +77,7 @@ function generateFolders(){
 function generateResources(resource){
 	var cName = Util.capitalizeLetter(resource);
 
-	var mName = Util.capitalizeLetter( pluralize.plural(resource) );
+	var mName = Util.capitalizeLetter( resource );
 
 	createController({
 		"name": resource,
@@ -87,7 +87,7 @@ function generateResources(resource){
 
 	createModel({
 		"name": pluralize.plural(resource),
-		"model": mName
+		"model": pluralize.plural( mName )
 	});
 }
 

@@ -58,6 +58,18 @@ module.exports = function(router) {
 	  * Delete
 	  */
 	router.delete('/{{= data.name }}/:id', function(req, res, next) {
-		res.json({type: true});
+		var _id = req.params.id;
+
+		{{= data.model}}.remove({_id: _id}, function(err){
+
+			if (err)
+				res.json({type: false, data: "Error occured: " + err});
+
+			res.json({
+				type: true,
+				message: "{{= data.model }} removed successfully!"
+			});
+
+		});
 	});
 };
