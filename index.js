@@ -147,10 +147,14 @@ function generateRoute(arg){
 
 	} finally {
 		if(typeof config === "object"){
-			// verify if route exists
-			config.routes.push(arg + "Controller");
 			
-			Util.modifyFile(_path, JSON.stringify(config, null, 4));
+			// verify controler exists in cofig routes
+			var crtl = arg + "Controller";
+			if(config.routes.indexOf(crtl)){
+				config.routes.push(crtl);
+				Util.modifyFile(_path, JSON.stringify(config, null, 4));
+			}
+
 		}
 
 	}
