@@ -77,16 +77,17 @@ function generateFolders(){
 function generateResources(resource){
 	var cName = Util.capitalizeLetter(resource);
 
-	var mName = pluralize.plural(resource);
+	var mName = Util.capitalizeLetter( pluralize.plural(resource) );
 
 	createController({
 		"name": resource,
-		"controller": cName
+		"controller": cName,
+		"model": mName
 	});
 
 	createModel({
 		"name": pluralize.plural(resource),
-		"model":Util.capitalizeLetter( mName)
+		"model": mName
 	});
 }
 
@@ -141,13 +142,12 @@ function generateRoute(arg){
 		 	if (err) throw err;
 		 	console.log('creating config.json...');
 
-		 	console.log(arg);
-
 		 	generateRoute(arg);
 		});
 
 	} finally {
 		if(typeof config === "object"){
+			// verify if route exists
 			config.routes.push(arg + "Controller");
 			
 			Util.modifyFile(_path, JSON.stringify(config, null, 4));

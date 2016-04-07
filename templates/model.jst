@@ -1,8 +1,8 @@
-
+// Default model
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 module.exports = mongoose.model('{{= data.name }}', new Schema({
-	create_at: { type: Date, default: Date.now }
+	create_at: { type: Date, default: Date.now },
 	update_at: { type: Date, default: Date.now }
 }));

@@ -5,7 +5,7 @@ var router = express.Router();
 // load controllers
 var config = require('./config.json');
 config.routes.forEach( function(element, index, array){
-	require("./controllers/" + element);
+	require("./controllers/" + element)(router);
 });
 
 module.exports = function(app) { 

@@ -1,21 +1,52 @@
 // Template Controller
-module.exports = function(router) {
-	router.get('/{{= data.name }}', function(req, res, next) { 
-		res.json({type: true});
-	}); 
 
+// model
+var model = require("../models/{{= data.model }}Schema");
+
+module.exports = function(router) {
+	
+	/**
+	  * List all
+	  */
+	router.get('/{{= data.name }}', function(req, res, next) { 
+		model.find(function(err, data){
+
+			if (err) 
+				res.json({type: false, data: "Error occured: " + err});
+
+			res.json({
+				type: true,
+				data: data
+			});
+
+		});
+	}); 
+	
+	/**
+	  * Show
+	  */
 	router.get('/{{= data.name }}/:id', function(req, res, next) {
 		res.json({type: true});
 	});
 
+
+	/**
+	  * Create
+	  */
 	router.post('/{{= data.name }}', function(req, res, next) {
 		res.json({type: true});
 	});
 
+	/**
+	  * Update
+	  */
 	router.put('/{{= data.name }}/:id', function(req, res, next) {
 		res.json({type: true});
 	});
-
+	
+	/**
+	  * Delete
+	  */
 	router.delete('/{{= data.name }}/:id', function(req, res, next) {
 		res.json({type: true});
 	});
