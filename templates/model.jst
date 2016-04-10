@@ -2,7 +2,26 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-module.exports = mongoose.model('{{= data.name }}', new Schema({
+var fields = {
 	create_at: { type: Date, default: Date.now },
 	update_at: { type: Date, default: Date.now }
-}));
+};
+
+module.exports.get = function() { 
+	return mongoose.model('{{= data.name }}', new Schema( fields ));
+};
+
+module.exports.form = function(params){
+	var obj = {};
+
+	for ( var key in fields ) {
+		if ( key != 'create_at' && key != 'update_at'){
+			if (params[key])
+				obj[key] = params[key];
+			else
+				obj[key] = '';
+		}
+	};
+
+	return obj;
+}

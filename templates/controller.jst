@@ -1,8 +1,8 @@
-// Template Controller
+// import model
+var Schema = require("../models/{{= data.model }}Schema");
+var {{= data.model }} = Schema.get();
 
-// model
-var {{= data.model }} = require("../models/{{= data.model }}Schema");
-
+// {{= data.name }} Controller
 module.exports = function(router) {
 	
 	/**
@@ -38,7 +38,6 @@ module.exports = function(router) {
 			})
 		});
 	});
-
 
 	/**
 	  * Create
