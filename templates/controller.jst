@@ -43,7 +43,19 @@ module.exports = function(router) {
 	  * Create
 	  */
 	router.post('/{{= data.name }}', function(req, res, next) {
-		res.json({type: true});
+		var params = Schema.form(req.body);
+
+		var model = new {{= data.model }}(params);
+		model.save(function(err){
+			if (err)
+				res.json({type: false, data: "Error occured: " + err});
+
+			res.json({
+				type: true,
+				data: "Created"
+			});
+			
+		})
 	});
 
 	/**
