@@ -14,14 +14,16 @@ module.exports.get = function() {
 module.exports.form = function(params){
 	var obj = {};
 
+	delete fields.create_at
+
 	for ( var key in fields ) {
-		if ( key != 'create_at' && key != 'update_at'){
-			if (params[key])
-				obj[key] = params[key];
-			else
-				obj[key] = '';
-		}
+		if (params[key])
+			obj[key] = params[key];
+		else
+			obj[key] = '';
 	};
+
+	obj.update_at = Date.now();
 
 	return obj;
 }

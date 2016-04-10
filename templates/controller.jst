@@ -55,14 +55,28 @@ module.exports = function(router) {
 				data: "Created"
 			});
 			
-		})
+		});
 	});
 
 	/**
 	  * Update
 	  */
 	router.put('/{{= data.name }}/:id', function(req, res, next) {
-		res.json({type: true});
+		var _id = req.params.id;
+		
+		var params = Schema.form(req.body);
+
+		{{= data.model }}.findOneAndUpdate({_id: _id}, params, function(err, data){
+			console.log(data);
+			if (err)
+				res.json({type: false, data: "Error occured: " + err});
+
+			res.json({
+				type: true,
+				data: data
+			});
+			
+		});
 	});
 	
 	/**
