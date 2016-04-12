@@ -12,16 +12,20 @@ Getting started with egen is easy.
 5. For create your resources use de command `egen -r ResourceName`.
 
 
-## Application Folder Structure Example
+## Application Structure
 
 ```
-/api
-/../controller
-/../controller/...
-/../models
-/../models/...
-/../config.json
-/../index.js
+
+/YourAppFolder
+	/api
+		/controllers
+			ExampleController.js
+		/models
+			ExampleSchema.js
+		config.json
+		index.js
+	...
+
 ```
 
 That's it!
